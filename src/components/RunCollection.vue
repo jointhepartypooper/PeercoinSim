@@ -3,6 +3,9 @@ import { computed, ref, type PropType } from "vue";
 import VerticalExpand from "../components/VerticalExpand.vue";
 import RunCard from "../components/RunCard.vue";
 import FileReader from "../components/FileReader.vue";
+
+import VueNumberInput from "../components/VueNumberInput.vue"
+
 const items = ref<string[]>([
   "diff: 17.4, static: 1.34",
   "diff: 18.4, static: 1.34",
@@ -59,17 +62,14 @@ function onFileLoad(jsonString: string) {
           </div>
           <div class="col-3">
             <label for="exampleFormControlInput1" class="form-label"
-              >Pos difficulty</label
+              >Pos difficulty56</label
             >
           </div>
           <div class="col-3">
-            <input
-              type="email"
-              class="form-control form-control-sm"
-              id="exampleFormControlInput1"
-              placeholder="name@example.com"
-              v-model.number="somevalue"
+            <VueNumberInput v-model="somevalue" :min="1" :max="140" :step="10.3" :controls="true"
+            inputclass="form-control form-control-sm"
             />
+ 
           </div>
         </div>
 
@@ -111,7 +111,7 @@ function onFileLoad(jsonString: string) {
               class="form-control form-control-sm form-control-color"
               id="exampleColorInput"
               value="#563d7c"
-              title="Choose your color"
+              title="color in chart"
             />
           </div>
           <div class="col-3">
