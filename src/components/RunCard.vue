@@ -73,18 +73,36 @@ function onRight() {
         name="co-arrow-thick-left"
         class="me-1 pointer"
         @click="onLeft"
+        data-bs-toggle="tooltip"
+        title="Move to left"
       />
       <OhVueIcon
         name="co-chart-line"
         class="me-1 pointer"
         @click="onShowToggle"
+        data-bs-toggle="tooltip"
+        title="Toggle chart"
       />
-      <OhVueIcon name="co-save" class="me-1 pointer" @click="onSave" />
-      <OhVueIcon name="bi-trash3" class="me-1 pointer" @click="onRemove" />
+      <OhVueIcon
+        name="co-save"
+        class="me-1 pointer"
+        @click="onSave"
+        data-bs-toggle="tooltip"
+        title="Download run"
+      />
+      <OhVueIcon
+        name="bi-trash3"
+        class="me-1 pointer"
+        @click="onRemove"
+        data-bs-toggle="tooltip"
+        title="Remove run"
+      />
       <OhVueIcon
         name="co-arrow-thick-right"
         class="me-1 pointer"
         @click="onRight"
+        data-bs-toggle="tooltip"
+        title="Move to left"
       />
     </div>
     <div class="card-body">

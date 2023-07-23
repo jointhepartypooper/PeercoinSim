@@ -30,9 +30,9 @@ function onFileLoad(jsonString: string) {
 <template>
   <div class="text-bg-light">
     <div class="row pt-2">
-      <div class="col-12">
-        <div class="btn-group" role="group" aria-label="Basic outlined example">
-          <button type="button" class="btn btn-outline-primary">
+      <div class="col-12 text-end px-4">
+        <div class="btn-group" role="group" aria-label="Manage runs">
+          <button type="button" class="btn btn-outline-success">
             Add new run
           </button>
         </div>
@@ -49,7 +49,7 @@ function onFileLoad(jsonString: string) {
 
     <VerticalExpand>
       <div v-if="1 == 1" class="mt-3 px-3">
-        <div class="settings">Settings</div>
+        <div class="settings">Run settings</div>
         <div class="row my-2">
           <div class="col-3">Name</div>
           <div class="col-3">
