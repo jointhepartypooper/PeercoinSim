@@ -2,6 +2,8 @@
 import { computed, ref, type PropType } from "vue";
 import { OhVueIcon } from "oh-vue-icons";
 import { useToast } from "vue-toastification";
+import FileSaver from "file-saver";
+import { v4 as uuid } from "uuid";
 
 const toast = useToast();
 const props = defineProps({
@@ -32,6 +34,15 @@ function onShowToggle() {
 }
 function onSave() {
   console.log("save request");
+  let myUUID = uuid();
+  const obj = { runId: myUUID, name: "John", age: 30, city: "New York" };
+  const myJSON = JSON.stringify(obj);
+  // Note: Ie and Edge don't support the new File constructor,
+  // so it's better to construct blobs and use saveAs(blob, filename)
+  var file = new File([myJSON], "hello world.json", {
+    type: "text/plain;charset=utf-8",
+  });
+  FileSaver.saveAs(file);
 }
 function onRemove() {
   console.log("remove request");
