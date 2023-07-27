@@ -3,14 +3,33 @@ import { computed, ref, type PropType } from "vue";
 import VerticalExpand from "../components/VerticalExpand.vue";
 import RunCard from "../components/RunCard.vue";
 import FileReader from "../components/FileReader.vue";
+import { type IRun, type IMetaRun } from "../models/IRun";
+import VueNumberInput from "../components/VueNumberInput.vue";
 
-import VueNumberInput from "../components/VueNumberInput.vue"
+const emit = defineEmits<{
+  (e: "add-run"): void;
+  (e: "remove-card", id: string): void;
+  (e: "toggle-card", id: string): void;
+  (e: "update-card", id: IMetaRun): void;
+}>();
+const props = defineProps({
+  // runName: {
+  //   type: String,
+  //   required: true,
+  // },
+  // runSelected: {
+  //   type: Boolean,
+  //   default: false,
+  // },
+  metaRuns: {
+    type: Array as PropType<Array<IMetaRun>>,
+    required: true,
+  },
+});
+const currentCard = computed<IMetaRun | undefined>(() => {
+  return props.metaRuns.find((c) => c.selected);
+});
 
-const items = ref<string[]>([
-  "diff: 17.4, static: 1.34",
-  "diff: 18.4, static: 1.34",
-  "diff: 19.4, static: 1.34",
-]);
 const somevalue = ref<number>(100);
 // function onUpdate(newValue:number, oldValue:number) {
 //     console.log(newValue, oldValue);
@@ -21,9 +40,24 @@ const somevalue = ref<number>(100);
 //   onInput(event) {
 //     console.log(event);
 //   },
-
+function onAddRun() {
+  emit("add-run");
+}
+function onRemoveRun(id: string) {
+  emit("remove-card", id);
+}
+function onToggleCard(id: string) {
+  emit("toggle-card", id);
+}
 function onFileLoad(jsonString: string) {
   console.log(jsonString);
+}
+function onColorChanged(event: any) {
+  const target = event.target as HTMLInputElement;
+  let hhh = target.value;
+  const copy = JSON.parse(JSON.stringify(currentCard.value)); // as typeof IMetaRun;
+  (copy as IMetaRun).run.colorCode = target.value;
+  emit("update-card", copy);
 }
 </script>
 
@@ -32,7 +66,11 @@ function onFileLoad(jsonString: string) {
     <div class="row pt-2">
       <div class="col-12 text-end px-4">
         <div class="btn-group" role="group" aria-label="Manage runs">
-          <button type="button" class="btn btn-outline-success">
+          <button
+            type="button"
+            @click="onAddRun"
+            class="btn btn-outline-success"
+          >
             Add new run
           </button>
         </div>
@@ -41,14 +79,18 @@ function onFileLoad(jsonString: string) {
 
     <div class="px-2 mt-2 pb-3">
       <div class="row row-cols-2 row-cols-md-6 g-4">
-        <div class="col" v-for="(item, index) in items" :key="index">
-          <RunCard :run-name="item" :run-selected="index == 1"></RunCard>
+        <div class="col" v-for="item in metaRuns" :key="item.runId">
+          <RunCard
+            :meta-run="item"
+            @remove-card="onRemoveRun"
+            @toggle-card="onToggleCard"
+          ></RunCard>
         </div>
       </div>
     </div>
 
     <VerticalExpand>
-      <div v-if="1 == 1" class="mt-3 px-3">
+      <div v-if="!!currentCard" class="mt-3 px-3">
         <div class="settings">Run settings</div>
         <div class="row my-2">
           <div class="col-3">Name</div>
@@ -66,10 +108,14 @@ function onFileLoad(jsonString: string) {
             >
           </div>
           <div class="col-3">
-            <VueNumberInput v-model="somevalue" :min="1" :max="140" :step="10.3" :controls="true"
-            inputclass="form-control form-control-sm"
+            <VueNumberInput
+              v-model="somevalue"
+              :min="1"
+              :max="140"
+              :step="10.3"
+              :controls="true"
+              inputclass="form-control form-control-sm"
             />
- 
           </div>
         </div>
 
@@ -110,7 +156,8 @@ function onFileLoad(jsonString: string) {
               type="color"
               class="form-control form-control-sm form-control-color"
               id="exampleColorInput"
-              value="#563d7c"
+              :value="currentCard.run.colorCode"
+              @input="onColorChanged"
               title="color in chart"
             />
           </div>

@@ -4,17 +4,19 @@ import { OhVueIcon } from "oh-vue-icons";
 import { useToast } from "vue-toastification";
 import FileSaver from "file-saver";
 import { v4 as uuid } from "uuid";
-
+import { type IRun, type IMetaRun } from "../models/IRun";
+ 
+const emit = defineEmits(["remove-card", "toggle-card"]);
 const toast = useToast();
 const props = defineProps({
-  runName: {
-    type: String,
+  metaRun: {
+    type: Object as PropType<IMetaRun>,
     required: true,
   },
-  runSelected: {
-    type: Boolean,
-    default: false,
-  },
+  // runSelected: {
+  //   type: Boolean,
+  //   default: false,
+  // },
   //   sourceElementsArray: {
   //     type: Array as PropType<Array<someinterface>>,
   //     required: true,
@@ -44,8 +46,13 @@ function onSave() {
   });
   FileSaver.saveAs(file);
 }
+
+function onToggleCard() {
+  emit("toggle-card", props.metaRun.runId);
+}
+
 function onRemove() {
-  console.log("remove request");
+  emit("remove-card", props.metaRun.runId);
 }
 function onRight() {
   console.log("onRight request");
@@ -67,46 +74,50 @@ function onRight() {
 </script>
 
 <template>
-  <div class="card" :class="{ 'card-selected': runSelected }">
+  <div
+    @click="onToggleCard"
+    class="card"
+    :class="{ 'card-selected': metaRun.selected }"
+  >
     <div>
       <OhVueIcon
         name="co-arrow-thick-left"
         class="me-1 pointer"
-        @click="onLeft"
+        @click.stop="onLeft"
         data-bs-toggle="tooltip"
         title="Move to left"
       />
       <OhVueIcon
         name="co-chart-line"
         class="me-1 pointer"
-        @click="onShowToggle"
+        @click.stop="onShowToggle"
         data-bs-toggle="tooltip"
         title="Toggle chart"
       />
       <OhVueIcon
         name="co-save"
         class="me-1 pointer"
-        @click="onSave"
+        @click.stop="onSave"
         data-bs-toggle="tooltip"
         title="Download run"
       />
       <OhVueIcon
         name="bi-trash3"
         class="me-1 pointer"
-        @click="onRemove"
+        @click.stop="onRemove"
         data-bs-toggle="tooltip"
         title="Remove run"
       />
       <OhVueIcon
         name="co-arrow-thick-right"
         class="me-1 pointer"
-        @click="onRight"
+        @click.stop="onRight"
         data-bs-toggle="tooltip"
         title="Move to left"
       />
     </div>
     <div class="card-body">
-      <h5 class="card-title">{{ runName }}</h5>
+      <h5 class="card-title">{{ metaRun.run.name }}</h5>
       <p class="card-text">Status: running</p>
       <!-- <a href="#" class="btn btn-primary">Go somewhere</a> -->
     </div>

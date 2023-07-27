@@ -1,8 +1,12 @@
-//defines the file being exported
-export interface IRun {
+export interface IMetaRun {
   //a guid to identify a run
   runId: string;
+  selected: boolean;
+  run: IRun;
+}
 
+//defines the file being exported
+export interface IRun {
   // a name to display in chart
   name: string;
 
@@ -21,11 +25,11 @@ export interface IRun {
   //days after minDays before coinage is capped. Currently at 60
   rampDays: number;
 
-  //used for the daily probability distribution of mints. 
+  //used for the daily probability distribution of mints.
   //default 100
   sampleSize: number;
 
-  //run the simulation till this max of days. Prior are the minDays which is at 30 days. 
+  //run the simulation till this max of days. Prior are the minDays which is at 30 days.
   //default at 730
   maxDays: number;
 
