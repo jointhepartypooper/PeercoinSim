@@ -38,3 +38,14 @@ yarn dev
 ```sh
 yarn build
 ```
+### Notes and definitions (for now)
+
+| definitions  |remarks   |default   |
+|---|---|---|
+|IncubationDays  |a.k.s No_Ramp-Days, days to wait after a tx before mints are allowed   |  30|
+|RampUpDays | days after IncubationTime before coindays are capped   |60   |
+|StaticRewardRate|effects the total stake reward when mint|0.0025 = 0.25%|
+|StaticReward| (0.0025 * MoneySupply / YearlyBlocks)  | ~1.34 in mid 2023     |
+|DaysInYear|(365 * 33 + 8) / 33|365.242424|
+|AnnualRewardRate|Annual reward rate where Total reward =  (0.03 * coindays / year) + StaticReward|0.03 = 3%|
+|mint probability|a mint occures when hash < coins * dayweight * target. target is   (2^224 / ‘difficulty’). A hash is a value between 0 and 2^256  |(coins * dayweight) / (difficulty * 2^32)|
