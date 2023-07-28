@@ -62,6 +62,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  required: {
+    type: Boolean,
+    default: false,
+  },
   rounded: {
     type: Boolean,
     default: false,
@@ -187,6 +191,7 @@ function setValue(valueIn: number | string): void {
       :disabled="disabled || (!decreasable && !increasable)"
       :placeholder="placeholder"
       autocomplete="off"
+      :required="required"
       @change="onChange"
       @paste="onPaste"
     />

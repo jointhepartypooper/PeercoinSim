@@ -1,14 +1,21 @@
 export interface IMetaRun {
   //a guid to identify a run
   runId: string;
-  selected: boolean;
+
   run: IRun;
+
+  selected: boolean;
+
+  sequence: number;
 }
 
 //defines the file being exported
 export interface IRun {
   // a name to display in chart
   name: string;
+
+  //any notes on the run
+  notes: string;
 
   //the difficulty of POS: e.g. 17.40
   posDiff: number;

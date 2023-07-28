@@ -1,28 +1,3 @@
-<template>
-  <div class="input-group custom-file-button">
-    <label class="input-group-text" for="inputGroupFile"
-      > <OhVueIcon name="px-briefcase-upload" /></label
-    >
-    <input
-      type="file"
-      class="form-control form-control-sm"
-      id="inputGroupFile"
-      aria-describedby="inputGroupFileAddon04"
-      aria-label="Upload"
-      ref="file"
-      @change="loadTextFromFile"
-    />
-
-    <button
-      class="btn btn-outline-secondary"
-      type="button"
-      id="inputGroupFileAddon04"
-      @click="readFile"
-    >
-      <OhVueIcon name="fc-process" />
-    </button>
-  </div>
-</template>
 
 <script setup lang="ts">
 import { computed, ref, type PropType } from "vue";
@@ -54,6 +29,34 @@ function readFile() {
   reader.readAsText(fileObject!.value!);
 }
 </script>
+
+<template>
+  <div class="input-group custom-file-button">
+    <label class="input-group-text" for="inputGroupFile"
+      > <OhVueIcon name="px-briefcase-upload" /></label
+    >
+    <input
+      type="file"
+      class="form-control form-control-sm"
+      id="inputGroupFile"
+      aria-describedby="inputGroupFileAddon04"
+      aria-label="Upload"
+      ref="file"
+      @change="loadTextFromFile"
+    />
+
+    <button
+      class="btn btn-outline-secondary"
+      type="button"
+      id="inputGroupFileAddon04"
+      :disabled="!hasJsonChosen"
+      @click="readFile"
+    >
+      <OhVueIcon name="fc-process" />
+    </button>
+  </div>
+</template>
+
 
 <style lang="scss">
 .custom-file-button {
