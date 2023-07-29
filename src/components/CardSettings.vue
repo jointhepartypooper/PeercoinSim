@@ -3,14 +3,14 @@ import { computed, nextTick, ref, type PropType } from "vue";
 import { type IRun, type IMetaRun } from "../models/IRun";
 import VueNumberInput from "../components/VueNumberInput.vue";
 import FileReader from "../components/FileReader.vue";
-
+import CheckboxToggle from "../components/CheckboxToggle.vue";
 import { type IModelSimulator } from "../components/IModelSimulator";
 import { RewardSimulator } from "../components/RewardSimulator";
-
 import { useToast } from "vue-toastification";
 const toast = useToast();
 const emit = defineEmits<{
   (e: "update-card", card: IMetaRun): void;
+  (e: "toggle-chart", id: string, newValue: boolean): void;
 }>();
 const props = defineProps({
   metaRun: {
@@ -20,7 +20,10 @@ const props = defineProps({
 });
 const isrunning = ref<boolean>(false);
 const readyForAction = computed<boolean>(() => {
-  return !isrunning.value && (!props.metaRun.run.status || props.metaRun.run.status <100 );
+  return (
+    !isrunning.value &&
+    (!props.metaRun.run.status || props.metaRun.run.status < 100)
+  );
 });
 
 function doRun(): void {
@@ -42,16 +45,30 @@ function doRun(): void {
     nextTick(() => {
       const sim = new RewardSimulator(props.metaRun.run) as IModelSimulator;
 
-      const results = sim.getXYYResults(updateProgress);
+      const results = sim.getXYResults(updateProgress);
 
-      if (results.length === 3)
+      if (results.length === 3) {
+        const rewardForSizes = results[1];
+        const mintsForSizes = results[2];
+        const maxMint = Math.max(...mintsForSizes);
+        const optimalUTXOSize = results[0][argMax(rewardForSizes)];
+
+        const blockLoss =
+          -1.0 * (1 - mintsForSizes[argMax(rewardForSizes)] / maxMint) * 100;
         onProperyChanged([
           { field: "status", newvalue: 100 },
           { field: "results", newvalue: results },
+          { field: "optimalUTXOSize", newvalue: optimalUTXOSize },
+          { field: "blocksLostAtOptimum", newvalue: blockLoss },
         ]);
+      }
       isrunning.value = false;
     });
   } catch (error) {}
+}
+
+function argMax(arr: number[]): number {
+  return arr.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
 }
 
 function onProperyChanged(items: { field: string; newvalue: any }[]) {
@@ -176,7 +193,7 @@ function onFileLoad(jsonString: string) {
     </div>
     <div class="col-3">
       <label for="frmIpfractionReward" class="form-label"
-        >Fraction reward tot coins</label
+        >Fraction reward</label
       >
     </div>
     <div class="col-3">
@@ -332,8 +349,18 @@ function onFileLoad(jsonString: string) {
         "
       />
     </div>
-    <div class="col-3"></div>
-    <div class="col-3"></div>
+    <div class="col-3">Show in chart</div>
+    <div class="col-3">
+      <CheckboxToggle
+        :modelValue="metaRun.showChart"
+        :show-labels="false"
+        label-checked="Show in chart"
+        label-unchecked=""
+        @update:model-value="
+          emit('toggle-chart', metaRun.runId, !metaRun.showChart)
+        "
+      />
+    </div>
   </div>
 
   <div class="row">
@@ -370,6 +397,17 @@ function onFileLoad(jsonString: string) {
     <div class="invalid-feedback">not used</div>
   </div>
 
+  <div class="row my-2">
+    <div class="col-3">Blocks lost at optimum</div>
+    <div class="col-3">
+      {{ metaRun.run.blocksLostAtOptimum }}
+    </div>
+    <div class="col-3">Optimal UTXO Size</div>
+    <div class="col-3">
+      {{ metaRun.run.optimalUTXOSize }}
+    </div>
+  </div>
+
   <div class="mb-3">
     <button
       class="btn btn-success btn-lg"
@@ -377,7 +415,7 @@ function onFileLoad(jsonString: string) {
       type="button"
       @click="doRun"
     >
-      run
+      Run
     </button>
   </div>
 </template>
