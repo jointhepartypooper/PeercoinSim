@@ -56,30 +56,10 @@ export class RewardSimulator implements IModelSimulator {
     );
   }
 
-  //implements general interface: calulate avg rewards for sizes
+  //implements general interface: calulate avg rewards/mints for sizes
   public getXYResults(
     progressCallback: (progress: number) => void
   ): number[][] {
-    let results = [];
-    for (let index = 0; index < this.sizes.length; index++) {
-      if (!!progressCallback) {
-        const progress = (100 * (index + 1)) / this.sizes.length;
-        if (progress % 5 <= 0.01) progressCallback(progress);
-      }
-      const x = this.sizes[index];
-      results.push(
-        this.averageReward(x, this.DIFF, this.STATIC_REWARD, this.geometric)
-      );
-    }
-
-    if (!!progressCallback) progressCallback(100);
-    return [[...this.sizes], results];
-  }
-
-  //implements general interface: calulate avg rewards/mints for sizes
-  public getXYYResults(
-    progressCallback: (progress: number) => void
-  ): number[][][] {
     let resultsAverageReward = [] as number[];
     let resultsAverageMints = [] as number[];
     for (let index = 0; index < this.sizes.length; index++) {

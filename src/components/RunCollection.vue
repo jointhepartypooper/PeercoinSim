@@ -63,6 +63,7 @@ const currentCard = computed<IMetaRun | undefined>(() => {
       <div v-if="!!currentCard" class="mt-3 px-3">
         <CardSettings
           :meta-run="currentCard"
+          @toggle-chart="(id, newvalue) => emit('toggle-chart', id, newvalue)"
           @update-card="(card) => emit('update-card', card)"
         />
       </div>

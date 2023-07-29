@@ -95,7 +95,6 @@ function toggleSelected(id: string, newval: boolean) {
 }
 
 function toggleChartSelected(id: string, newval: boolean) {
-  debugger;
   let run = metaRuns.value.find((r) => r.runId === id);
   if (!!run) {
     run.showChart = newval;
@@ -112,6 +111,7 @@ function updateStatus(id: string, newstatus: number) {
 function updateCard(newCard: IMetaRun) {
   let card = metaRuns.value.find((x) => x.runId === newCard.runId);
   if (!!card) {
+    const prevStatus = card.run.status ?? 0;
     card.run.name = newCard.run.name;
     card.run.colorCode = newCard.run.colorCode;
     card.run.posDiff = newCard.run.posDiff;
@@ -125,6 +125,10 @@ function updateCard(newCard: IMetaRun) {
     card.run.coinSupply = newCard.run.coinSupply;
     card.run.status = newCard.run.status ?? 0;
     card.run.results = newCard.run.results;
+    card.run.optimalUTXOSize = newCard.run.optimalUTXOSize;
+    card.run.blocksLostAtOptimum = newCard.run.blocksLostAtOptimum;
+    if (card.run.status !== prevStatus && card.run.status >= 100)
+      card.showChart = true;
   }
 }
 </script>
