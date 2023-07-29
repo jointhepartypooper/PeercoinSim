@@ -5,7 +5,7 @@ export interface IMetaRun {
   run: IRun;
 
   selected: boolean;
-
+  showChart: boolean;
   sequence: number;
 }
 
@@ -54,4 +54,6 @@ export interface IRun {
 
   //status of run: 0 being initialised, 100: ready
   status?: number;
+
+  results?: number[][];
 }

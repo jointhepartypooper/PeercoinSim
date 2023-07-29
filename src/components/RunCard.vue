@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import { type PropType } from "vue";
 import { OhVueIcon } from "oh-vue-icons";
+import CircleProgress from "../components/CircleProgress.vue";
 import FileSaver from "file-saver";
 import { type IMetaRun } from "../models/IRun";
 
 const emit = defineEmits<{
   (e: "remove-card", id: string): void;
   (e: "toggle-card", id: string): void;
+  (e: "toggle-chart", id: string): void;
   (e: "move-left-card", id: string): void;
   (e: "move-right-card", id: string): void;
 }>();
@@ -17,10 +19,6 @@ const props = defineProps({
     required: true,
   },
 });
- 
-function onShowToggle() {
-  console.log("onShow request");
-}
 
 function onSave() {
   const obj = props.metaRun.run;
@@ -37,16 +35,14 @@ function onSave() {
   );
   FileSaver.saveAs(file);
 }
-
- 
- 
 </script>
 
 <template>
   <div
-    @click.stop="emit('toggle-card', metaRun.runId)"     
+    @click.stop="emit('toggle-card', metaRun.runId)"
     class="card"
     :class="{ 'card-selected': metaRun.selected }"
+    data-bs-toggle="tooltip" data-bs-placement="top" :title="metaRun.run.name??'no name'"
   >
     <div>
       <OhVueIcon
@@ -59,7 +55,8 @@ function onSave() {
       <OhVueIcon
         name="co-chart-line"
         class="me-1 pointer"
-        @click.stop="onShowToggle"
+        :class="{'chart-selected': !!metaRun.showChart}"
+        @click.stop="emit('toggle-chart', metaRun.runId)"
         data-bs-toggle="tooltip"
         title="Toggle chart"
       />
@@ -87,14 +84,20 @@ function onSave() {
     </div>
     <div class="card-body">
       <p
-        class="card-title fs-6"
+        class="card-title fs-6 rounded"
         :style="{ 'background-color': metaRun.run.colorCode }"
       >
         {{ metaRun.run.name }}
       </p>
-
-      <p class="card-text">Status: todo</p>
- 
+      <div class="d-flex justify-content-center flex-nowrap">
+        <div class="mx-2 p-2"></div>
+        <div class="mx-2 p-2">
+          <circle-progress
+          front-color="#3cb054" 
+          :value="metaRun.run.status??0" />
+        </div>
+        <div class="mx-2 p-2"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -106,5 +109,8 @@ function onSave() {
 }
 .pointer:hover {
   cursor: pointer;
+}
+.chart-selected{
+  box-shadow: 0px 0px 1px 1px #3cb054;
 }
 </style>
