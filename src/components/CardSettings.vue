@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, ref, type PropType } from "vue";
+import { computed, nextTick, ref, type PropType } from "vue";
 import { type IRun, type IMetaRun } from "../models/IRun";
 import VueNumberInput from "../components/VueNumberInput.vue";
 import FileReader from "../components/FileReader.vue";
+
+import { type IModelSimulator } from "../components/IModelSimulator";
+import { RewardSimulator } from "../components/RewardSimulator";
+
 import { useToast } from "vue-toastification";
 const toast = useToast();
 const emit = defineEmits<{
-  (e: "update-card", id: IMetaRun): void;
+  (e: "update-card", card: IMetaRun): void;
 }>();
 const props = defineProps({
   metaRun: {
@@ -14,6 +18,31 @@ const props = defineProps({
     required: true,
   },
 });
+const isrunning = ref<boolean>(false);
+const readyForAction = computed<boolean>(() => {
+  return !isrunning.value;
+});
+
+function doRun(): void {
+  if (isrunning.value) return;
+  isrunning.value = true;
+
+  try {
+    const updateProgress = (progress: number) => {
+      onProperyChanged("status", progress);
+    };
+    updateProgress(0);
+    nextTick(() => {
+      const sim = new RewardSimulator(props.metaRun.run) as IModelSimulator;
+
+      const results = sim.getXYResults(updateProgress);
+
+      updateProgress(100);
+      if (results.length === 2) onProperyChanged("results", results);
+      isrunning.value = false;
+    });
+  } catch (error) {}
+}
 
 function onProperyChanged(field: string, newvalue: any) {
   const copy = JSON.parse(JSON.stringify(props.metaRun));
@@ -305,7 +334,14 @@ function onFileLoad(jsonString: string) {
   </div>
 
   <div class="mb-3">
-    <button class="btn btn-success btn-lg" type="button">run it</button>
+    <button
+      class="btn btn-success btn-lg"
+      :disabled="!readyForAction"
+      type="button"
+      @click="doRun"
+    >
+      run
+    </button>
   </div>
 </template>
 

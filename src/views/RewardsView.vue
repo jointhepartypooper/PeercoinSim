@@ -28,10 +28,11 @@ function addRun() {
       relativeReward: 0.03,
       minDays: 30,
       rampDays: 60,
-      blockIntervalSeconds: 10*60,
+      blockIntervalSeconds: 10 * 60,
       geometric: false,
       maxDays: 730,
-      coinSupply: 28285814
+      coinSupply: 28285814,
+      status:0
     },
     sequence: count,
     selected: count === 0,
@@ -78,6 +79,20 @@ function toggleSelected(id: string) {
   }
 }
 
+function toggleChartSelected(id: string) {
+  let run = metaRuns.value.find((r) => r.runId === id);
+  if (!!run) {
+    run.showChart = !run.showChart;
+  }
+}
+
+function updateStatus(id: string, newstatus: number) {
+  let run = metaRuns.value.find((r) => r.runId === id);
+  if (!!run) {
+    run.run.status = newstatus;
+  }
+}
+
 function updateCard(newCard: IMetaRun) {
   let card = metaRuns.value.find((x) => x.runId === newCard.runId);
   if (!!card) {
@@ -92,6 +107,8 @@ function updateCard(newCard: IMetaRun) {
     card.run.blockIntervalSeconds = newCard.run.blockIntervalSeconds;
     card.run.maxDays = newCard.run.maxDays;
     card.run.coinSupply = newCard.run.coinSupply;
+    card.run.status = newCard.run.status??0;
+    card.run.results = newCard.run.results;
   }
 }
 </script>
@@ -103,9 +120,11 @@ function updateCard(newCard: IMetaRun) {
       @add-run="addRun"
       @remove-card="removeRun"
       @toggle-card="toggleSelected"
+      @toggle-chart="toggleChartSelected"
       @update-card="updateCard"
       @move-left-card="moveLeftRun"
       @move-right-card="moveRightRun"
+      @update-status="updateStatus"
     />
 
     <Chart />

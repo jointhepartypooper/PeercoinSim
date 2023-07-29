@@ -1,4 +1,5 @@
-import {type IModelSimulator} from "../components/IModelSimulator"
+import { type IModelSimulator } from "../components/IModelSimulator";
+import { type IRun } from "@/models/IRun";
 
 export class RewardSimulator implements IModelSimulator {
   private SECDAY: number = 60 * 60 * 24;
@@ -7,12 +8,12 @@ export class RewardSimulator implements IModelSimulator {
 
   private DIFF: number;
   private STATIC_REWARD: number;
-  private BLOCK_INTERVAL_SECS: number;//not used yet
+  private BLOCK_INTERVAL_SECS: number; //not used yet
   private RELATIVE_REWARD: number;
   private MAX_DAYS: number;
   private MIN_PROB_DAYS: number; //not used yet
   private NO_MINT_DAY: number;
-  private SUPPLY: number;//not used yet
+  private SUPPLY: number; //not used yet
   private RAMP_UP: number;
   private DAYS: number[];
   private DAYS_WITH_NO_MINT: number[];
@@ -20,31 +21,21 @@ export class RewardSimulator implements IModelSimulator {
   private sizes: number[];
   private geometric: boolean;
   //todo construct with object:
-  constructor(
-    posDiff: number,
-    staticReward: number,
-    blockIntervalSeconds: number,
-    relativeReward: number,
-    maxDays: number,
-    minDays: number,
-    coinSupply: number,
-    rampUp: number,
-    geometric: boolean
-  ) {
-    this.DIFF = posDiff;
-    this.STATIC_REWARD = staticReward;
-    this.BLOCK_INTERVAL_SECS = blockIntervalSeconds;
-    this.RELATIVE_REWARD = relativeReward;
-    this.MAX_DAYS = maxDays;
-    this.MIN_PROB_DAYS = minDays;
-    this.NO_MINT_DAY = maxDays + minDays;
-    this.SUPPLY = coinSupply;
-    this.RAMP_UP = rampUp;
-    this.geometric = geometric;
+  constructor(settings:IRun) {
+    this.DIFF = settings.posDiff;
+    this.STATIC_REWARD = settings.staticReward;
+    this.BLOCK_INTERVAL_SECS = settings.blockIntervalSeconds;
+    this.RELATIVE_REWARD = settings.relativeReward;
+    this.MAX_DAYS = settings.maxDays;
+    this.MIN_PROB_DAYS = settings.minDays;
+    this.NO_MINT_DAY = settings.maxDays + settings.minDays;
+    this.SUPPLY = settings.coinSupply;
+    this.RAMP_UP = settings.rampDays;
+    this.geometric = settings.geometric;
     //prefill ouput sizes:
     this.sizes = [...Array(501).keys()].map((x) => 10 ** (x / 125));
-    const rangeDays = [...Array(maxDays).keys()];
-    this.DAYS = rangeDays.map((x) => minDays + x + this.halfDay);
+    const rangeDays = [...Array(settings.maxDays).keys()];
+    this.DAYS = rangeDays.map((x) => settings.minDays + x + this.halfDay);
     this.DAYS_WITH_NO_MINT = [...this.DAYS, this.NO_MINT_DAY];
 
     // Max weight is the ramp up or assume a constant half day if no ramp up
@@ -66,12 +57,14 @@ export class RewardSimulator implements IModelSimulator {
   }
 
   //implementens general interface: calulate avg rewards for sizes
-  public getXYResults(progressCallback: (progress: number) => void): number[][] {
+  public getXYResults(
+    progressCallback: (progress: number) => void
+  ): number[][] {
     let results = [];
     for (let index = 0; index < this.sizes.length; index++) {
       if (!!progressCallback) {
-        const progress = (1.0 * index) / this.sizes.length;
-        if (progress % 5 === 0) progressCallback(progress);
+        const progress = (100 * (index + 1)) / this.sizes.length;
+        if (progress % 5 <= 0.01) progressCallback(progress);
       }
       const x = this.sizes[index];
       results.push(
