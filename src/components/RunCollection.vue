@@ -8,8 +8,8 @@ import CardSettings from "../components/CardSettings.vue";
 const emit = defineEmits<{
   (e: "add-run"): void;
   (e: "remove-card", id: string): void;
-  (e: "toggle-card", id: string): void;
-  (e: "toggle-chart", id: string): void;
+  (e: "toggle-card", id: string, newValue: boolean): void;
+  (e: "toggle-chart", id: string, newValue: boolean): void;
   (e: "move-left-card", id: string): void;
   (e: "move-right-card", id: string): void;
   (e: "update-card", card: IMetaRun): void;
@@ -48,10 +48,10 @@ const currentCard = computed<IMetaRun | undefined>(() => {
       <div class="row row-cols-2 row-cols-md-6 g-4">
         <div class="col" v-for="item in metaRuns" :key="item.runId">
           <RunCard
-            :meta-run="item"            
+            :meta-run="item"
             @remove-card="emit('remove-card', item.runId)"
-            @toggle-card="emit('toggle-card', item.runId)"
-            @toggle-chart="emit('toggle-chart', item.runId)"
+            @toggle-card="(id, newval) => emit('toggle-card', id, newval)"
+            @toggle-chart="(id, newval) => emit('toggle-chart', id, newval)"
             @move-left-card="emit('move-left-card', item.runId)"
             @move-right-card="emit('move-right-card', item.runId)"
           ></RunCard>

@@ -8,20 +8,20 @@ export class RewardSimulator implements IModelSimulator {
 
   private DIFF: number;
   private STATIC_REWARD: number;
-  private BLOCK_INTERVAL_SECS: number; //not used yet
+  private BLOCK_INTERVAL_SECS: number; //not used here, used in Security formula
   private RELATIVE_REWARD: number;
   private MAX_DAYS: number;
-  private MIN_PROB_DAYS: number; //not used yet
+  private MIN_PROB_DAYS: number;
   private NO_MINT_DAY: number;
-  private SUPPLY: number; //not used yet
+  private SUPPLY: number; //not used here, used in Security formula
   private RAMP_UP: number;
   private DAYS: number[];
   private DAYS_WITH_NO_MINT: number[];
   private probSecs: number[];
   private sizes: number[];
   private geometric: boolean;
-  //todo construct with object:
-  constructor(settings:IRun) {
+
+  constructor(settings: IRun) {
     this.DIFF = settings.posDiff;
     this.STATIC_REWARD = settings.staticReward;
     this.BLOCK_INTERVAL_SECS = settings.blockIntervalSeconds;
@@ -35,7 +35,7 @@ export class RewardSimulator implements IModelSimulator {
     //prefill ouput sizes:
     this.sizes = [...Array(501).keys()].map((x) => 10 ** (x / 125));
     const rangeDays = [...Array(settings.maxDays).keys()];
-    this.DAYS = rangeDays.map((x) => settings.minDays + x + this.halfDay);
+    this.DAYS = rangeDays.map((x) => this.MIN_PROB_DAYS + x + this.halfDay);
     this.DAYS_WITH_NO_MINT = [...this.DAYS, this.NO_MINT_DAY];
 
     // Max weight is the ramp up or assume a constant half day if no ramp up
@@ -56,7 +56,7 @@ export class RewardSimulator implements IModelSimulator {
     );
   }
 
-  //implementens general interface: calulate avg rewards for sizes
+  //implements general interface: calulate avg rewards for sizes
   public getXYResults(
     progressCallback: (progress: number) => void
   ): number[][] {
@@ -76,6 +76,33 @@ export class RewardSimulator implements IModelSimulator {
     return [[...this.sizes], results];
   }
 
+  //implements general interface: calulate avg rewards/mints for sizes
+  public getXYYResults(
+    progressCallback: (progress: number) => void
+  ): number[][][] {
+    let resultsAverageReward = [] as number[];
+    let resultsAverageMints = [] as number[];
+    for (let index = 0; index < this.sizes.length; index++) {
+      if (!!progressCallback) {
+        const progress = (100 * (index + 1)) / this.sizes.length;
+        if (progress % 5 <= 0.01) progressCallback(progress);
+      }
+      const x = this.sizes[index];
+      resultsAverageReward.push(
+        this.averageReward(x, this.DIFF, this.STATIC_REWARD, this.geometric)
+      );
+      resultsAverageMints.push(this.averageMints(x, this.DIFF));
+    }
+
+    if (!!progressCallback) progressCallback(100);
+
+    const array = new Array(3);
+    array[0] = [...this.sizes];
+    array[1] = resultsAverageReward;
+    array[2] = resultsAverageMints;
+    return array;
+  }
+
   public averageReward(
     outputSize: number,
     diff: number,
@@ -88,12 +115,13 @@ export class RewardSimulator implements IModelSimulator {
       .map((x) => this.DAYS_WITH_NO_MINT[x] * probs[x])
       .reduce((a, b) => a + b, 0);
 
-    /*
-    if geometric:
-        returns = 1+rewards/outValue
-        weightedReturn = (returns**probs).prod()
-        return (weightedReturn**(DAYYEAR/weightedTime) - 1) * 100
-*/
+    if (geometric) {
+      const returns = rewards.map((r) => 1 + r / outputSize);
+      const weightedReturn = [...Array(probs.length).keys()]
+        .map((i) => returns[i] ** probs[i])
+        .reduce((a, b) => a * b);
+      return (weightedReturn ** (this.DAYYEAR / weightedTime) - 1) * 100;
+    }
 
     // Arithmetic
     const returns = rewards.map((x) => (1.0 * x) / outputSize);
@@ -128,6 +156,17 @@ export class RewardSimulator implements IModelSimulator {
     return [...dailyProbs, lastElement];
   }
 
+  //number of mints
+  public averageMints(outputSize: number, diff: number): number {
+    const probs = this.generateDailyProbs(outputSize, diff);
+    const probFail = probs[probs.length - 1];
+    let weightedTime = [...Array(probs.length).keys()]
+      .map((x) => this.DAYS_WITH_NO_MINT[x] * probs[x])
+      .reduce((a, b) => a + b, 0);
+
+    return ((1 - probFail) / weightedTime / outputSize) * 365;
+  }
+
   // Calculate Geometric average of rewards weighted by probabilities
   public dailyRewards(outputSize: number, staticReward: number): number[] {
     const mintRewards = this.DAYS.map(
@@ -139,14 +178,6 @@ export class RewardSimulator implements IModelSimulator {
     const includingFailed = [...mintRewards, 0];
     return includingFailed;
   }
-
-  // public toXYCoords(y: number[]): number[][] {
-  //   const coordinates = [] as number[][];
-  //   for (let i = 0; i < this.DAYS_WITH_NO_MINT.length; i++) {
-  //     coordinates.push([this.DAYS_WITH_NO_MINT[i], y[i]]);
-  //   }
-  //   return coordinates;
-  // }
 
   cumprod(arr: number[]): number[] {
     const cummulative = [];

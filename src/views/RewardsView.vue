@@ -16,6 +16,21 @@ const orderedMetaRuns = computed<IMetaRun[]>(() => {
   return metaRuns.value.sort((a, b) => (a.sequence > b.sequence ? 1 : -1));
 });
 
+const chartedMetaRuns = computed<IMetaRun[]>(() => {
+  return orderedMetaRuns.value.filter(
+    (a) =>
+      !!a.showChart &&
+      !!a.run.status &&
+      a.run.status >= 100 &&
+      !!a.run.results &&
+      (a.run.results.length == 2 || a.run.results.length == 3) &&
+      a.run.results[0].length > 0 &&
+      a.run.results[0].length === a.run.results[1].length &&
+      (a.run.results.length == 2 ||
+        a.run.results[2].length === a.run.results[1].length)
+  );
+});
+
 function addRun() {
   const count = metaRuns.value.length;
   metaRuns.value.push({
@@ -31,11 +46,12 @@ function addRun() {
       blockIntervalSeconds: 10 * 60,
       geometric: false,
       maxDays: 730,
-      coinSupply: 28285814,
-      status:0
+      coinSupply: 28500000,
+      status: 0,
     },
     sequence: count,
     selected: count === 0,
+    showChart: false,
   } as IMetaRun);
 }
 
@@ -67,22 +83,22 @@ function moveRightRun(id: string) {
   }
 }
 
-function toggleSelected(id: string) {
+function toggleSelected(id: string, newval: boolean) {
   let run = metaRuns.value.find((r) => r.runId === id);
   if (!!run) {
-    const curVal = run.selected;
-    if (!curVal) {
+    if (newval) {
       let others = metaRuns.value.filter((r) => r.runId !== id);
       others.forEach((c) => (c.selected = false));
     }
-    run.selected = !run.selected;
+    run.selected = newval;
   }
 }
 
-function toggleChartSelected(id: string) {
+function toggleChartSelected(id: string, newval: boolean) {
+  debugger;
   let run = metaRuns.value.find((r) => r.runId === id);
   if (!!run) {
-    run.showChart = !run.showChart;
+    run.showChart = newval;
   }
 }
 
@@ -107,7 +123,7 @@ function updateCard(newCard: IMetaRun) {
     card.run.blockIntervalSeconds = newCard.run.blockIntervalSeconds;
     card.run.maxDays = newCard.run.maxDays;
     card.run.coinSupply = newCard.run.coinSupply;
-    card.run.status = newCard.run.status??0;
+    card.run.status = newCard.run.status ?? 0;
     card.run.results = newCard.run.results;
   }
 }
@@ -127,7 +143,10 @@ function updateCard(newCard: IMetaRun) {
       @update-status="updateStatus"
     />
 
-    <Chart />
+    <Chart
+      v-if="!!chartedMetaRuns && chartedMetaRuns.length > 0"
+      :meta-runs="chartedMetaRuns"
+    />
   </div>
 </template>
 <style lang="scss">
