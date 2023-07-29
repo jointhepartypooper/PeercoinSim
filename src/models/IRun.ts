@@ -17,6 +17,9 @@ export interface IRun {
   //any notes on the run
   notes: string;
 
+  //Supply in coins. Whilst the total supply can be used, some coins may be considerated irredeemable.
+  coinSupply: number;
+
   //the difficulty of POS: e.g. 17.40
   posDiff: number;
 
@@ -24,7 +27,7 @@ export interface IRun {
   staticReward: number;
 
   //the percentage in fraction of total coins in system: e.g. 0.03
-  percentageReward: number;
+  relativeReward: number;
 
   //days to wait to be able to mint. Currently at 30
   minDays: number;
@@ -33,8 +36,8 @@ export interface IRun {
   rampDays: number;
 
   //used for the daily probability distribution of mints.
-  //default 100
-  sampleSize: number;
+  //default 600
+  blockIntervalSeconds: number;
 
   //run the simulation till this max of days. Prior are the minDays which is at 30 days.
   //default at 730

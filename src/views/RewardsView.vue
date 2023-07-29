@@ -25,12 +25,13 @@ function addRun() {
       name: "run " + (count + 1),
       posDiff: 20,
       staticReward: 1.34,
-      percentageReward: 0.03,
+      relativeReward: 0.03,
       minDays: 30,
       rampDays: 60,
-      sampleSize: 100,
+      blockIntervalSeconds: 10*60,
       geometric: false,
       maxDays: 730,
+      coinSupply: 28285814
     },
     sequence: count,
     selected: count === 0,
@@ -85,11 +86,12 @@ function updateCard(newCard: IMetaRun) {
     card.run.posDiff = newCard.run.posDiff;
     card.run.notes = newCard.run.notes;
     card.run.staticReward = newCard.run.staticReward;
-    card.run.percentageReward = newCard.run.percentageReward;
+    card.run.relativeReward = newCard.run.relativeReward;
     card.run.minDays = newCard.run.minDays;
     card.run.rampDays = newCard.run.rampDays;
-    card.run.sampleSize = newCard.run.sampleSize;
+    card.run.blockIntervalSeconds = newCard.run.blockIntervalSeconds;
     card.run.maxDays = newCard.run.maxDays;
+    card.run.coinSupply = newCard.run.coinSupply;
   }
 }
 </script>

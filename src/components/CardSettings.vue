@@ -26,10 +26,10 @@ function isRunType(o: any): o is IRun {
     "name" in o &&
     "posDiff" in o &&
     "staticReward" in o &&
-    "percentageReward" in o &&
+    "relativeReward" in o &&
     "minDays" in o &&
     "rampDays" in o &&
-    "sampleSize" in o &&
+    "blockIntervalSeconds" in o &&
     "maxDays" in o &&
     "colorCode" in o
   );
@@ -134,9 +134,9 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpfractionReward"
-        :modelValue="metaRun.run.percentageReward"
+        :modelValue="metaRun.run.relativeReward"
         @update:modelValue="
-          (newValue) => onProperyChanged('percentageReward', newValue)
+          (newValue) => onProperyChanged('relativeReward', newValue)
         "
         :min="0"
         :max="1"
@@ -144,8 +144,8 @@ function onFileLoad(jsonString: string) {
         :controls="false"
         :required="true"
         :inputclass="
-          metaRun.run.percentageReward !== undefined &&
-          metaRun.run.percentageReward >= 0
+          metaRun.run.relativeReward !== undefined &&
+          metaRun.run.relativeReward >= 0
             ? 'form-control form-control-sm'
             : 'form-control form-control-sm is-invalid'
         "
@@ -205,12 +205,12 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpsampleSize"
-        :modelValue="metaRun.run.sampleSize"
+        :modelValue="metaRun.run.blockIntervalSeconds"
         @update:modelValue="
-          (newValue) => onProperyChanged('sampleSize', newValue)
+          (newValue) => onProperyChanged('blockIntervalSeconds', newValue)
         "
         :min="0"
-        :max="1000"
+        :max="10000"
         :step="1"
         :controls="false"
         :required="true"
@@ -241,6 +241,33 @@ function onFileLoad(jsonString: string) {
         "
       />
     </div>
+  </div>
+
+  <div class="row">
+    <div class="col-3">
+      <label for="frmIpcoinSupply" class="form-label">Sample size</label>
+    </div>
+    <div class="col-3">
+      <VueNumberInput
+        id="frmIpcoinSupply"
+        :modelValue="metaRun.run.coinSupply"
+        @update:modelValue="
+          (newValue) => onProperyChanged('coinSupply', newValue)
+        "
+        :min="10000"
+        :max="100000000"
+        :step="1000"
+        :controls="false"
+        :required="true"
+        :inputclass="
+          !!metaRun.run.coinSupply
+            ? 'form-control form-control-sm'
+            : 'form-control form-control-sm is-invalid'
+        "
+      />
+    </div>
+    <div class="col-3"></div>
+    <div class="col-3"></div>
   </div>
 
   <div class="row">
