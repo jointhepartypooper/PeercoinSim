@@ -20,7 +20,7 @@ const props = defineProps({
 });
 const isrunning = ref<boolean>(false);
 const readyForAction = computed<boolean>(() => {
-  return !isrunning.value;
+  return !isrunning.value && (!props.metaRun.run.status || props.metaRun.run.status <100 );
 });
 
 function doRun(): void {
@@ -28,25 +28,38 @@ function doRun(): void {
   isrunning.value = true;
 
   try {
+    let startTime = Date.now() - 3000;
     const updateProgress = (progress: number) => {
-      onProperyChanged("status", progress);
+      let endTime = Date.now();
+
+      if (endTime - startTime > 2000) {
+        startTime = Date.now();
+        onProperyChanged([{ field: "status", newvalue: progress }]);
+      }
     };
     updateProgress(0);
+
     nextTick(() => {
       const sim = new RewardSimulator(props.metaRun.run) as IModelSimulator;
 
-      const results = sim.getXYResults(updateProgress);
+      const results = sim.getXYYResults(updateProgress);
 
-      updateProgress(100);
-      if (results.length === 2) onProperyChanged("results", results);
+      if (results.length === 3)
+        onProperyChanged([
+          { field: "status", newvalue: 100 },
+          { field: "results", newvalue: results },
+        ]);
       isrunning.value = false;
     });
   } catch (error) {}
 }
 
-function onProperyChanged(field: string, newvalue: any) {
+function onProperyChanged(items: { field: string; newvalue: any }[]) {
   const copy = JSON.parse(JSON.stringify(props.metaRun));
-  copy.run[field] = newvalue;
+  items.forEach((element) => {
+    copy.run[element.field] = element.newvalue;
+  });
+
   emit("update-card", copy);
 }
 // Validate this value with a custom type guard (extend to your needs)
@@ -107,7 +120,7 @@ function onFileLoad(jsonString: string) {
         placeholder="name of run"
         aria-label=".form-control-sm example"
         :value="metaRun.run.name"
-        @input="(event)=>onProperyChanged('name', (event.target as HTMLInputElement).value)"
+        @update:modelValue="(newValue:string) => onProperyChanged([{field:'name', newvalue: newValue}])"
       />
     </div>
     <div class="col-3">
@@ -116,8 +129,12 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpDiff"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.posDiff"
-        @update:modelValue="(newValue) => onProperyChanged('posDiff', newValue)"
+        @update:modelValue="
+          (newValue) =>
+            onProperyChanged([{ field: 'posDiff', newvalue: newValue }])
+        "
         :min="0.1"
         :max="150"
         :step="0.1"
@@ -139,9 +156,11 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpStaticReward"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.staticReward"
         @update:modelValue="
-          (newValue) => onProperyChanged('staticReward', newValue)
+          (newValue) =>
+            onProperyChanged([{ field: 'staticReward', newvalue: newValue }])
         "
         :min="0"
         :max="10"
@@ -163,9 +182,11 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpfractionReward"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.relativeReward"
         @update:modelValue="
-          (newValue) => onProperyChanged('relativeReward', newValue)
+          (newValue) =>
+            onProperyChanged([{ field: 'relativeReward', newvalue: newValue }])
         "
         :min="0"
         :max="1"
@@ -189,8 +210,12 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpmindays"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.minDays"
-        @update:modelValue="(newValue) => onProperyChanged('minDays', newValue)"
+        @update:modelValue="
+          (newValue) =>
+            onProperyChanged([{ field: 'minDays', newvalue: newValue }])
+        "
         :min="0"
         :max="100"
         :step="1"
@@ -209,9 +234,11 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIprampDays"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.rampDays"
         @update:modelValue="
-          (newValue) => onProperyChanged('rampDays', newValue)
+          (newValue) =>
+            onProperyChanged([{ field: 'rampDays', newvalue: newValue }])
         "
         :min="0"
         :max="100"
@@ -229,14 +256,18 @@ function onFileLoad(jsonString: string) {
 
   <div class="row">
     <div class="col-3">
-      <label for="frmIpsampleSize" class="form-label">Sample size</label>
+      <label for="frmIpsampleSize" class="form-label">Block target</label>
     </div>
     <div class="col-3">
       <VueNumberInput
+        :disabled="true"
         id="frmIpsampleSize"
         :modelValue="metaRun.run.blockIntervalSeconds"
         @update:modelValue="
-          (newValue) => onProperyChanged('blockIntervalSeconds', newValue)
+          (newValue) =>
+            onProperyChanged([
+              { field: 'blockIntervalSeconds', newvalue: newValue },
+            ])
         "
         :min="0"
         :max="10000"
@@ -256,8 +287,12 @@ function onFileLoad(jsonString: string) {
     <div class="col-3">
       <VueNumberInput
         id="frmIpmaxDays"
+        :disabled="!readyForAction"
         :modelValue="metaRun.run.maxDays"
-        @update:modelValue="(newValue) => onProperyChanged('maxDays', newValue)"
+        @update:modelValue="
+          (newValue) =>
+            onProperyChanged([{ field: 'maxDays', newvalue: newValue }])
+        "
         :min="0"
         :max="10000"
         :step="1"
@@ -274,14 +309,16 @@ function onFileLoad(jsonString: string) {
 
   <div class="row">
     <div class="col-3">
-      <label for="frmIpcoinSupply" class="form-label">Sample size</label>
+      <label for="frmIpcoinSupply" class="form-label">Coins supply</label>
     </div>
     <div class="col-3">
       <VueNumberInput
+        :disabled="true"
         id="frmIpcoinSupply"
         :modelValue="metaRun.run.coinSupply"
         @update:modelValue="
-          (newValue) => onProperyChanged('coinSupply', newValue)
+          (newValue) =>
+            onProperyChanged([{ field: 'coinSupply', newvalue: newValue }])
         "
         :min="10000"
         :max="100000000"
@@ -309,7 +346,7 @@ function onFileLoad(jsonString: string) {
         class="form-control form-control-sm form-control-color"
         id="exampleColorInput"
         :value="metaRun.run.colorCode"
-        @input="(event)=>onProperyChanged('colorCode', (event.target as HTMLInputElement).value)"
+        @input="(event)=>onProperyChanged([{field:'colorCode', newvalue: (event.target as HTMLInputElement).value}])"
         title="color in chart"
       />
     </div>
@@ -328,7 +365,7 @@ function onFileLoad(jsonString: string) {
       id="validationTextarea"
       placeholder="optional notes of the run"
       :value="metaRun.run.notes"
-      @input="(event)=>onProperyChanged('notes', (event.target as HTMLInputElement).value)"
+      @input="(event)=>onProperyChanged([{field:'notes', newvalue:(event.target as HTMLInputElement).value}])"
     ></textarea>
     <div class="invalid-feedback">not used</div>
   </div>

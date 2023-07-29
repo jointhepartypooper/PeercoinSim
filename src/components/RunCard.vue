@@ -4,11 +4,11 @@ import { OhVueIcon } from "oh-vue-icons";
 import CircleProgress from "../components/CircleProgress.vue";
 import FileSaver from "file-saver";
 import { type IMetaRun } from "../models/IRun";
-
+ 
 const emit = defineEmits<{
   (e: "remove-card", id: string): void;
-  (e: "toggle-card", id: string): void;
-  (e: "toggle-chart", id: string): void;
+  (e: "toggle-card", id: string, newValue:boolean): void;
+  (e: "toggle-chart", id: string, newValue:boolean): void;
   (e: "move-left-card", id: string): void;
   (e: "move-right-card", id: string): void;
 }>();
@@ -39,50 +39,54 @@ function onSave() {
 
 <template>
   <div
-    @click.stop="emit('toggle-card', metaRun.runId)"
     class="card"
     :class="{ 'card-selected': metaRun.selected }"
-    data-bs-toggle="tooltip" data-bs-placement="top" :title="metaRun.run.name??'no name'"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    :title="metaRun.run.name ?? 'no name'"
   >
     <div>
       <OhVueIcon
         name="co-arrow-thick-left"
         class="me-1 pointer"
-        @click.stop="emit('move-left-card', metaRun.runId)"
+        @click.stop.prevent="emit('move-left-card', metaRun.runId)
+        "
         data-bs-toggle="tooltip"
         title="Move to left"
       />
       <OhVueIcon
         name="co-chart-line"
         class="me-1 pointer"
-        :class="{'chart-selected': !!metaRun.showChart}"
-        @click.stop="emit('toggle-chart', metaRun.runId)"
+        :class="{ 'chart-selected': !!metaRun.showChart }"
+        @click.stop.prevent="emit('toggle-chart', metaRun.runId, !metaRun.showChart)"
         data-bs-toggle="tooltip"
         title="Toggle chart"
       />
       <OhVueIcon
         name="co-save"
         class="me-1 pointer"
-        @click.stop="onSave"
+        @click.stop.prevent="onSave"
         data-bs-toggle="tooltip"
         title="Download run"
       />
       <OhVueIcon
         name="bi-trash3"
         class="me-1 pointer"
-        @click.stop="emit('remove-card', metaRun.runId)"
+        @click.stop.prevent="emit('remove-card', metaRun.runId)"
         data-bs-toggle="tooltip"
         title="Remove run"
       />
       <OhVueIcon
         name="co-arrow-thick-right"
         class="me-1 pointer"
-        @click.stop="emit('move-right-card', metaRun.runId)"
+        @click.stop.prevent="emit('move-right-card', metaRun.runId)"
         data-bs-toggle="tooltip"
         title="Move to left"
       />
     </div>
-    <div class="card-body">
+    <div
+      class="card-body"
+      @click.stop.prevent="emit('toggle-card', metaRun.runId, !metaRun.selected)"    >
       <p
         class="card-title fs-6 rounded"
         :style="{ 'background-color': metaRun.run.colorCode }"
@@ -93,8 +97,9 @@ function onSave() {
         <div class="mx-2 p-2"></div>
         <div class="mx-2 p-2">
           <circle-progress
-          front-color="#3cb054" 
-          :value="metaRun.run.status??0" />
+            front-color="#3cb054"
+            :value="metaRun.run.status ?? 0"
+          />
         </div>
         <div class="mx-2 p-2"></div>
       </div>
@@ -110,7 +115,7 @@ function onSave() {
 .pointer:hover {
   cursor: pointer;
 }
-.chart-selected{
+.chart-selected {
   box-shadow: 0px 0px 1px 1px #3cb054;
 }
 </style>

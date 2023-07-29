@@ -55,5 +55,6 @@ export interface IRun {
   //status of run: 0 being initialised, 100: ready
   status?: number;
 
-  results?: number[][];
+  //results of run over x and y1 and y2
+  results?: number[][] | number[][];
 }

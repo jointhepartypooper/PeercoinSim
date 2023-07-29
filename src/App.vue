@@ -5,7 +5,7 @@ import { RouterLink, RouterView } from "vue-router";
 
 <template>
   <div class="container my-5">
-    <h1 class="text-center">simulation runner</h1>
+    <h1 class="text-center">stake reward simulations</h1>
 
     <ul class="nav nav-tabs nav-tabs-frame maintab">
       <li class="nav-item">
