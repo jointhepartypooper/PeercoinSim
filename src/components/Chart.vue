@@ -74,7 +74,7 @@ const dataset = computed<number[][]>(() => {
   const arrayData = [] as number[][];
 
   const sets = [...props.metaRuns];
-  const count = sets.length;
+  const setcount = sets.length;
 
   const allx = sets.map((s) => s.run.results![0]).flat();
   const uniqueX = allx.filter((item, pos) => {
@@ -83,18 +83,19 @@ const dataset = computed<number[][]>(() => {
   //loop all x value:
   for (let indexX = 0; indexX < uniqueX.length; indexX++) {
     const curX = uniqueX[indexX];
-    //get all y values for curx:
-    const xys = [] as number[];
+
+    //get all y values for curX:
+    const xys = [] as any[];
     xys.push(curX);
 
-    for (let indexY = 0; indexY < count; indexY++) {
+    for (let indexY = 0; indexY < setcount; indexY++) {
       const metarun = sets[indexY];
-      let yindex = metarun.run.results![0].indexOf(curX);
+      const yindex = metarun.run.results![0].indexOf(curX);
       if (metarun.run.results?.length === 2) {
-        xys.push(metarun.run.results[1][yindex]);
+        xys.push(yindex > -1 ? metarun.run.results[1][yindex] : null);
       } else if (metarun.run.results?.length === 3) {
-        xys.push(metarun.run.results[1][yindex]);
-        xys.push(metarun.run.results[2][yindex]);
+        xys.push(yindex > -1 ? metarun.run.results[1][yindex] : null);
+        xys.push(yindex > -1 ? metarun.run.results[2][yindex] : null);
       }
     }
     if (xys.length > 1) arrayData.push(xys);
@@ -132,7 +133,7 @@ const chartData = computed(() => {
 const linearOptions = computed(() => {
   return {
     title: title.value,
-    //legend: "none",
+    interpolateNulls: true,
     pointSize: 1,
     // width: 1155,
     height: 800,

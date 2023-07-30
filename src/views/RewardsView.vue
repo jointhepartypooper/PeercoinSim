@@ -109,6 +109,7 @@ function updateStatus(id: string, newstatus: number) {
 }
 
 function updateCard(newCard: IMetaRun) {
+ 
   let card = metaRuns.value.find((x) => x.runId === newCard.runId);
   if (!!card) {
     const prevStatus = card.run.status ?? 0;
