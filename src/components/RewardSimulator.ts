@@ -2,24 +2,24 @@ import { type IModelSimulator } from "../components/IModelSimulator";
 import { type IRun } from "@/models/IRun";
 
 export class RewardSimulator implements IModelSimulator {
-  private SECDAY: number = 60 * 60 * 24;
-  private DAYYEAR = (365 * 33 + 8) / 33;
-  private halfDay: number = 0.5;
+  protected SECDAY: number = 60 * 60 * 24;
+  protected DAYYEAR = (365 * 33 + 8) / 33;
+  protected halfDay: number = 0.5;
 
-  private DIFF: number;
-  private STATIC_REWARD: number;
-  private BLOCK_INTERVAL_SECS: number; //not used here, used in Security formula
-  private RELATIVE_REWARD: number;
-  private MAX_DAYS: number;
-  private MIN_PROB_DAYS: number;
-  private NO_MINT_DAY: number;
-  private SUPPLY: number; //not used here, used in Security formula
-  private RAMP_UP: number;
-  private DAYS: number[];
-  private DAYS_WITH_NO_MINT: number[];
-  private probSecs: number[];
-  private sizes: number[];
-  private geometric: boolean;
+  protected DIFF: number;
+  protected STATIC_REWARD: number;
+  protected BLOCK_INTERVAL_SECS: number; //not used here, used in Security formula
+  protected RELATIVE_REWARD: number;
+  protected MAX_DAYS: number;
+  protected MIN_PROB_DAYS: number;
+  protected NO_MINT_DAY: number;
+  protected SUPPLY: number; //not used here, used in Security formula
+  protected RAMP_UP: number;
+  protected DAYS: number[];
+  protected DAYS_WITH_NO_MINT: number[];
+  protected probSecs: number[];
+  protected sizes: number[];
+  protected geometric: boolean;
 
   constructor(settings: IRun) {
     this.DIFF = settings.posDiff;
