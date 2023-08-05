@@ -5,7 +5,7 @@ import VueNumberInput from "../components/VueNumberInput.vue";
 import FileReader from "../components/FileReader.vue";
 import CheckboxToggle from "../components/CheckboxToggle.vue";
 import { type IModelSimulator } from "../components/IModelSimulator";
-import { RewardSimulator } from "../components/RewardSimulator";
+import { RewardSimulatorFactory } from "../components/RewardSimulatorFactory";
 import { useToast } from "vue-toastification";
 const toast = useToast();
 const emit = defineEmits<{
@@ -43,7 +43,9 @@ function doRun(): void {
     updateProgress(0);
 
     nextTick(() => {
-      const sim = new RewardSimulator(props.metaRun.run) as IModelSimulator;
+      const sim = RewardSimulatorFactory.createSimulator(
+        props.metaRun.run
+      ) as IModelSimulator;
 
       const results = sim.getXYResults(updateProgress);
 
@@ -132,7 +134,7 @@ function onFileLoad(jsonString: string) {
         id="frmIpName"
         required
         class="form-control form-control-sm"
-        :class="{ 'is-invalid': !metaRun.run.name }"
+        :class="{ 'is-invalid': !(metaRun.run.name) }"
         type="text"
         placeholder="name of run"
         aria-label=".form-control-sm example"
