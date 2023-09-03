@@ -46,7 +46,7 @@ function addRun() {
       blockIntervalSeconds: 10 * 60,
       geometric: false,
       maxDays: 730,
-      coinSupply: 28500000,
+      coinSupply: 28327842,
       status: 0,
     },
     sequence: count,
