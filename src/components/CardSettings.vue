@@ -25,6 +25,19 @@ const readyForAction = computed<boolean>(() => {
     (!props.metaRun.run.status || props.metaRun.run.status < 100)
   );
 });
+const impliedSecurity = computed<number>(() => {
+  /*
+    SECURITY = (DIFF * 2**32) / (SUPPLY * maxDayWeight * BLOCK_INTERVAL_SECS)
+  */
+  const DIFF = props.metaRun.run.posDiff ?? 0.0;
+  const SUPPLY = props.metaRun.run.coinSupply ?? 0.0;
+  const maxDayWeight =
+    props.metaRun.run.rampDays > 0 ? props.metaRun.run.rampDays : 0.5;
+  const BLOCK_INTERVAL_SECS = props.metaRun.run.blockIntervalSeconds ?? 0.0;
+  return SUPPLY * maxDayWeight * BLOCK_INTERVAL_SECS === 0
+    ? 1
+    : (DIFF * 2 ** 32) / (1.0 * SUPPLY * maxDayWeight * BLOCK_INTERVAL_SECS);
+});
 
 function doRun(): void {
   if (isrunning.value) return;
@@ -134,7 +147,7 @@ function onFileLoad(jsonString: string) {
         id="frmIpName"
         required
         class="form-control form-control-sm"
-        :class="{ 'is-invalid': !(metaRun.run.name) }"
+        :class="{ 'is-invalid': !metaRun.run.name }"
         type="text"
         placeholder="name of run"
         aria-label=".form-control-sm example"
@@ -143,27 +156,16 @@ function onFileLoad(jsonString: string) {
       />
     </div>
     <div class="col-3">
-      <label for="frmIpDiff" class="form-label">Pos difficulty</label>
+      <label for="exampleColorInput" class="form-label">Color picker</label>
     </div>
     <div class="col-3">
-      <VueNumberInput
-        id="frmIpDiff"
-        :disabled="!readyForAction"
-        :modelValue="metaRun.run.posDiff"
-        @update:modelValue="
-          (newValue) =>
-            onProperyChanged([{ field: 'posDiff', newvalue: newValue }])
-        "
-        :min="0.1"
-        :max="150"
-        :step="0.1"
-        :controls="false"
-        :required="true"
-        :inputclass="
-          !!metaRun.run.posDiff
-            ? 'form-control form-control-sm'
-            : 'form-control form-control-sm is-invalid'
-        "
+      <input
+        type="color"
+        class="form-control form-control-sm form-control-color"
+        id="exampleColorInput"
+        :value="metaRun.run.colorCode"
+        @input="(event)=>onProperyChanged([{field:'colorCode', newvalue: (event.target as HTMLInputElement).value}])"
+        title="color in chart"
       />
     </div>
   </div>
@@ -222,7 +224,7 @@ function onFileLoad(jsonString: string) {
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-2">
     <div class="col-3">
       <label for="frmIpmindays" class="form-label">Incubation period</label>
     </div>
@@ -273,13 +275,12 @@ function onFileLoad(jsonString: string) {
     </div>
   </div>
 
-  <div class="row">
+  <div class="row mt-2">
     <div class="col-3">
       <label for="frmIpsampleSize" class="form-label">Block target</label>
     </div>
     <div class="col-3">
       <VueNumberInput
-        :disabled="true"
         id="frmIpsampleSize"
         :modelValue="metaRun.run.blockIntervalSeconds"
         @update:modelValue="
@@ -326,13 +327,12 @@ function onFileLoad(jsonString: string) {
     </div>
   </div>
 
-  <div class="row">
+  <div class="row my-2">
     <div class="col-3">
       <label for="frmIpcoinSupply" class="form-label">Coins supply</label>
     </div>
     <div class="col-3">
       <VueNumberInput
-        :disabled="true"
         id="frmIpcoinSupply"
         :modelValue="metaRun.run.coinSupply"
         @update:modelValue="
@@ -351,6 +351,35 @@ function onFileLoad(jsonString: string) {
         "
       />
     </div>
+    <div class="col-3">
+      <label for="frmIpDiff" class="form-label">Pos difficulty</label>
+    </div>
+    <div class="col-3">
+      <VueNumberInput
+        id="frmIpDiff"
+        :disabled="!readyForAction"
+        :modelValue="metaRun.run.posDiff"
+        @update:modelValue="
+          (newValue) =>
+            onProperyChanged([{ field: 'posDiff', newvalue: newValue }])
+        "
+        :min="0.1"
+        :max="150"
+        :step="0.1"
+        :controls="false"
+        :required="true"
+        :inputclass="
+          !!metaRun.run.posDiff
+            ? 'form-control form-control-sm'
+            : 'form-control form-control-sm is-invalid'
+        "
+      />
+    </div>
+  </div>
+
+  <div class="row my-2">
+    <div class="col-3">Implied security</div>
+    <div class="col-3">{{ impliedSecurity }}</div>
     <div class="col-3">Show in chart</div>
     <div class="col-3">
       <CheckboxToggle
@@ -366,19 +395,8 @@ function onFileLoad(jsonString: string) {
   </div>
 
   <div class="row">
-    <div class="col-3">
-      <label for="exampleColorInput" class="form-label">Color picker</label>
-    </div>
-    <div class="col-3">
-      <input
-        type="color"
-        class="form-control form-control-sm form-control-color"
-        id="exampleColorInput"
-        :value="metaRun.run.colorCode"
-        @input="(event)=>onProperyChanged([{field:'colorCode', newvalue: (event.target as HTMLInputElement).value}])"
-        title="color in chart"
-      />
-    </div>
+    <div class="col-3"></div>
+    <div class="col-3"></div>
     <div class="col-3">
       <label for="formFileSmtodo" class="form-label">Load export</label>
     </div>
